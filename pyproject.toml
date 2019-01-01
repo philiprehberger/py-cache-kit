@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "philiprehberger-cache-kit"
+version = "0.1.0"
+description = "Lightweight in-memory cache with TTL, LRU eviction, and tag-based invalidation"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Philip Rehberger" }]
+keywords = ["cache", "lru", "ttl", "memory", "caching"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://github.com/philiprehberger/py-cache-kit"
+Repository = "https://github.com/philiprehberger/py-cache-kit"
+Issues = "https://github.com/philiprehberger/py-cache-kit/issues"
