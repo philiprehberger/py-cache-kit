@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "philiprehberger-cache-kit"
-version = "0.1.0"
+version = "0.1.1"
 description = "Lightweight in-memory cache with TTL, LRU eviction, and tag-based invalidation"
 readme = "README.md"
 license = "MIT"
@@ -24,6 +24,7 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/philiprehberger/py-cache-kit"
+Homepage = "https://github.com/philiprehberger/py-cache-kit#readme"
 Repository = "https://github.com/philiprehberger/py-cache-kit"
 Issues = "https://github.com/philiprehberger/py-cache-kit/issues"
+Changelog = "https://github.com/philiprehberger/py-cache-kit/blob/main/CHANGELOG.md"
