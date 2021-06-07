@@ -60,10 +60,30 @@ print(removed)  # 2
 
 ```python
 cache.has("key")        # check existence
+"key" in cache          # same as has()
 cache.delete("key")     # delete single entry
 cache.keys()            # list all non-expired keys
+len(cache)              # count of non-expired entries
+cache.get_entry("key")  # get CacheEntry with tags, expires_at
 cache.clear()           # remove everything
 ```
+
+## API Reference
+
+| Method | Description |
+|---|---|
+| `Cache(max_size=1000, default_ttl=None)` | Create a new cache |
+| `.set(key, value, ttl=None, tags=None)` | Store a value |
+| `.get(key, default=None)` | Retrieve a value |
+| `.has(key)` | Check if key exists and is not expired |
+| `.delete(key)` | Remove a key |
+| `.invalidate_by_tag(tag)` | Remove all entries with a tag |
+| `.clear()` | Remove all entries |
+| `.keys()` | List non-expired keys |
+| `.get_entry(key)` | Get `CacheEntry` object (value, expires_at, tags) |
+| `.size` | Number of stored entries |
+| `len(cache)` | Number of non-expired entries |
+| `key in cache` | Check key existence |
 
 ## License
 
