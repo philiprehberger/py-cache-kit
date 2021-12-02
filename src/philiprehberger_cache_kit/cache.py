@@ -25,6 +25,7 @@ class Cache(Generic[T]):
 
     @property
     def size(self) -> int:
+        self._cleanup_expired()
         return len(self._store)
 
     def set(
@@ -41,6 +42,7 @@ class Cache(Generic[T]):
             self._store.move_to_end(key)
             self._store[key] = CacheEntry(value=value, expires_at=expires_at, tags=tags or set())
         else:
+            self._cleanup_expired()
             if len(self._store) >= self._max_size:
                 self._evict()
             self._store[key] = CacheEntry(value=value, expires_at=expires_at, tags=tags or set())
@@ -102,13 +104,8 @@ class Cache(Generic[T]):
         return entry
 
     def _evict(self) -> None:
-        now = time.monotonic()
-        for key, entry in list(self._store.items()):
-            if entry.expires_at is not None and now > entry.expires_at:
-                del self._store[key]
-                return
-
-        if self._store:
+        self._cleanup_expired()
+        if len(self._store) >= self._max_size and self._store:
             self._store.popitem(last=False)
 
     def _cleanup_expired(self) -> None:

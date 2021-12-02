@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- Fix cache eviction to clean all expired entries before LRU fallback
+- Fix `size` property to exclude expired entries
+
 ## 0.2.0
 
 - Add `max_size` validation (must be at least 1)

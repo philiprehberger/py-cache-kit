@@ -221,3 +221,46 @@ def test_overwrite_updates_value():
 def test_max_size_zero_raises():
     with pytest.raises(ValueError, match="max_size"):
         Cache(max_size=0)
+
+
+# --- size excludes expired entries ---
+
+def test_size_excludes_expired():
+    c = Cache()
+    c.set("a", 1, ttl=0.01)
+    c.set("b", 2, ttl=0.01)
+    c.set("c", 3)
+    time.sleep(0.05)
+    assert c.size == 1
+
+
+# --- Full cleanup on eviction ---
+
+def test_full_cleanup_on_eviction():
+    c = Cache(max_size=5)
+    c.set("a", 1, ttl=0.01)
+    c.set("b", 2, ttl=0.01)
+    c.set("c", 3, ttl=0.01)
+    c.set("d", 4)
+    c.set("e", 5)
+    time.sleep(0.05)
+    c.set("f", 6)  # should clean all 3 expired, no LRU eviction needed
+    assert c.get("d") == 4
+    assert c.get("e") == 5
+    assert c.get("f") == 6
+    assert c.size == 3
+
+
+# --- Expired cleanup before LRU ---
+
+def test_expired_cleaned_before_lru_eviction():
+    c = Cache(max_size=3)
+    c.set("a", 1, ttl=0.01)
+    c.set("b", 2)
+    c.set("c", 3)
+    time.sleep(0.05)
+    c.set("d", 4)  # expired "a" cleaned, "b" (LRU) should survive
+    assert c.get("a") is None
+    assert c.get("b") == 2
+    assert c.get("c") == 3
+    assert c.get("d") == 4
