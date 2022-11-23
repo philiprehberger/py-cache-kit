@@ -85,6 +85,14 @@ cache.clear()           # remove everything
 | `len(cache)` | Number of non-expired entries |
 | `key in cache` | Check key existence |
 
+
+## Development
+
+```bash
+pip install -e .
+python -m pytest tests/ -v
+```
+
 ## License
 
 MIT
