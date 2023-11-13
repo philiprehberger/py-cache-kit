@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 from collections import OrderedDict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TypeVar, Generic
 
 T = TypeVar("T")
@@ -15,6 +15,21 @@ class CacheEntry(Generic[T]):
     tags: set[str]
 
 
+@dataclass
+class CacheStats:
+    hits: int = 0
+    misses: int = 0
+    evictions: int = 0
+    expired: int = 0
+
+    @property
+    def hit_rate(self) -> float:
+        total = self.hits + self.misses
+        if total == 0:
+            return 0.0
+        return self.hits / total
+
+
 class Cache(Generic[T]):
     def __init__(self, max_size: int = 1000, default_ttl: float | None = None) -> None:
         self._max_size = max_size
@@ -22,6 +37,7 @@ class Cache(Generic[T]):
         if max_size < 1:
             raise ValueError("max_size must be at least 1")
         self._store: OrderedDict[str, CacheEntry[T]] = OrderedDict()
+        self._stats = CacheStats()
 
     @property
     def size(self) -> int:
@@ -50,14 +66,41 @@ class Cache(Generic[T]):
     def get(self, key: str, default: T | None = None) -> T | None:
         entry = self._store.get(key)
         if entry is None:
+            self._stats.misses += 1
             return default
 
         if entry.expires_at is not None and time.monotonic() > entry.expires_at:
             del self._store[key]
+            self._stats.expired += 1
+            self._stats.misses += 1
             return default
 
+        self._stats.hits += 1
         self._store.move_to_end(key)
         return entry.value
+
+    def get_many(self, keys: list[str]) -> dict[str, T]:
+        result: dict[str, T] = {}
+        for key in keys:
+            value = self.get(key)
+            if value is not None:
+                result[key] = value
+        return result
+
+    def set_many(self, items: dict[str, T], ttl: float | None = None) -> None:
+        for key, value in items.items():
+            self.set(key, value, ttl=ttl)
+
+    def stats(self) -> CacheStats:
+        return CacheStats(
+            hits=self._stats.hits,
+            misses=self._stats.misses,
+            evictions=self._stats.evictions,
+            expired=self._stats.expired,
+        )
+
+    def reset_stats(self) -> None:
+        self._stats = CacheStats()
 
     def has(self, key: str) -> bool:
         entry = self._store.get(key)
@@ -107,9 +150,11 @@ class Cache(Generic[T]):
         self._cleanup_expired()
         if len(self._store) >= self._max_size and self._store:
             self._store.popitem(last=False)
+            self._stats.evictions += 1
 
     def _cleanup_expired(self) -> None:
         now = time.monotonic()
         expired = [k for k, v in self._store.items() if v.expires_at is not None and now > v.expires_at]
         for key in expired:
             del self._store[key]
+            self._stats.expired += 1

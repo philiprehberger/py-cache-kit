@@ -1,5 +1,14 @@
 # philiprehberger-cache-kit
 
+[![Tests](https://github.com/philiprehberger/py-cache-kit/actions/workflows/publish.yml/badge.svg)](https://github.com/philiprehberger/py-cache-kit/actions/workflows/publish.yml)
+[![PyPI version](https://img.shields.io/pypi/v/philiprehberger-cache-kit.svg)](https://pypi.org/project/philiprehberger-cache-kit/)
+[![GitHub release](https://img.shields.io/github/v/release/philiprehberger/py-cache-kit)](https://github.com/philiprehberger/py-cache-kit/releases)
+[![Last updated](https://img.shields.io/github/last-commit/philiprehberger/py-cache-kit)](https://github.com/philiprehberger/py-cache-kit/commits/main)
+[![License](https://img.shields.io/github/license/philiprehberger/py-cache-kit)](LICENSE)
+[![Bug Reports](https://img.shields.io/github/issues/philiprehberger/py-cache-kit/bug)](https://github.com/philiprehberger/py-cache-kit/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
+[![Feature Requests](https://img.shields.io/github/issues/philiprehberger/py-cache-kit/enhancement)](https://github.com/philiprehberger/py-cache-kit/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
+[![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ec6cb9)](https://github.com/sponsors/philiprehberger)
+
 Lightweight in-memory cache with TTL, LRU eviction, and tag-based invalidation.
 
 ## Installation
@@ -56,6 +65,38 @@ removed = cache.invalidate_by_tag("team-a")
 print(removed)  # 2
 ```
 
+### Batch Operations
+
+```python
+# Set multiple entries at once
+cache.set_many({"a": 1, "b": 2, "c": 3}, ttl=30.0)
+
+# Get multiple entries at once (skips missing/expired)
+results = cache.get_many(["a", "b", "missing"])
+print(results)  # {"a": 1, "b": 2}
+```
+
+### Cache Statistics
+
+```python
+from philiprehberger_cache_kit import Cache, CacheStats
+
+cache: Cache[str] = Cache(max_size=100)
+
+cache.set("x", "hello")
+cache.get("x")        # hit
+cache.get("missing")  # miss
+
+stats = cache.stats()
+print(stats.hits)      # 1
+print(stats.misses)    # 1
+print(stats.hit_rate)  # 0.5
+print(stats.evictions) # 0
+print(stats.expired)   # 0
+
+cache.reset_stats()    # zero out all counters
+```
+
 ### Other Operations
 
 ```python
@@ -68,23 +109,27 @@ cache.get_entry("key")  # get CacheEntry with tags, expires_at
 cache.clear()           # remove everything
 ```
 
-## API Reference
+## API
 
-| Method | Description |
+| Function / Class | Description |
 |---|---|
 | `Cache(max_size=1000, default_ttl=None)` | Create a new cache |
 | `.set(key, value, ttl=None, tags=None)` | Store a value |
 | `.get(key, default=None)` | Retrieve a value |
+| `.get_many(keys)` | Retrieve multiple values, skip missing/expired |
+| `.set_many(items, ttl=None)` | Store multiple values |
 | `.has(key)` | Check if key exists and is not expired |
 | `.delete(key)` | Remove a key |
 | `.invalidate_by_tag(tag)` | Remove all entries with a tag |
 | `.clear()` | Remove all entries |
 | `.keys()` | List non-expired keys |
 | `.get_entry(key)` | Get `CacheEntry` object (value, expires_at, tags) |
+| `.stats()` | Get `CacheStats` (hits, misses, evictions, expired, hit_rate) |
+| `.reset_stats()` | Zero out all stat counters |
 | `.size` | Number of stored entries |
 | `len(cache)` | Number of non-expired entries |
 | `key in cache` | Check key existence |
-
+| `CacheStats` | Dataclass with hits, misses, evictions, expired, hit_rate |
 
 ## Development
 
@@ -93,6 +138,13 @@ pip install -e .
 python -m pytest tests/ -v
 ```
 
+## Support
+
+If you find this package useful, consider giving it a star on GitHub — it helps motivate continued maintenance and development.
+
+[![LinkedIn](https://img.shields.io/badge/Philip%20Rehberger-LinkedIn-0A66C2?logo=linkedin)](https://www.linkedin.com/in/philiprehberger)
+[![More packages](https://img.shields.io/badge/more-open%20source%20packages-blue)](https://philiprehberger.com/open-source-packages)
+
 ## License
 
-MIT
+[MIT](LICENSE)
