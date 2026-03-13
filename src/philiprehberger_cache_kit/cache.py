@@ -19,6 +19,8 @@ class Cache(Generic[T]):
     def __init__(self, max_size: int = 1000, default_ttl: float | None = None) -> None:
         self._max_size = max_size
         self._default_ttl = default_ttl
+        if max_size < 1:
+            raise ValueError("max_size must be at least 1")
         self._store: OrderedDict[str, CacheEntry[T]] = OrderedDict()
 
     @property
@@ -82,6 +84,22 @@ class Cache(Generic[T]):
     def keys(self) -> list[str]:
         self._cleanup_expired()
         return list(self._store.keys())
+
+    def __len__(self) -> int:
+        self._cleanup_expired()
+        return len(self._store)
+
+    def __contains__(self, key: str) -> bool:
+        return self.has(key)
+
+    def get_entry(self, key: str) -> CacheEntry[T] | None:
+        entry = self._store.get(key)
+        if entry is None:
+            return None
+        if entry.expires_at is not None and time.monotonic() > entry.expires_at:
+            del self._store[key]
+            return None
+        return entry
 
     def _evict(self) -> None:
         now = time.monotonic()
