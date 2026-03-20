@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "philiprehberger-cache-kit"
-version = "0.2.3"
+version = "0.2.4"
 description = "Lightweight in-memory cache with TTL, LRU eviction, and tag-based invalidation"
 readme = "README.md"
 license = "MIT"
@@ -31,3 +31,9 @@ Changelog = "https://github.com/philiprehberger/py-cache-kit/blob/main/CHANGELOG
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/philiprehberger_cache_kit"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.mypy]
+strict = true
