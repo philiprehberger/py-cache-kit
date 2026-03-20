@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "philiprehberger-cache-kit"
-version = "0.2.4"
+version = "0.2.5"
 description = "Lightweight in-memory cache with TTL, LRU eviction, and tag-based invalidation"
 readme = "README.md"
 license = "MIT"

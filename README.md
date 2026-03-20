@@ -1,5 +1,9 @@
 # philiprehberger-cache-kit
 
+[![Tests](https://github.com/philiprehberger/py-cache-kit/actions/workflows/publish.yml/badge.svg)](https://github.com/philiprehberger/py-cache-kit/actions/workflows/publish.yml)
+[![PyPI version](https://img.shields.io/pypi/v/philiprehberger-cache-kit.svg)](https://pypi.org/project/philiprehberger-cache-kit/)
+[![License](https://img.shields.io/github/license/philiprehberger/py-cache-kit)](LICENSE)
+
 Lightweight in-memory cache with TTL, LRU eviction, and tag-based invalidation.
 
 ## Installation
@@ -68,7 +72,7 @@ cache.get_entry("key")  # get CacheEntry with tags, expires_at
 cache.clear()           # remove everything
 ```
 
-## API Reference
+## API
 
 | Method | Description |
 |---|---|
