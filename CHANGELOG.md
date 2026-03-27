@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0 (2026-03-27)
+
+- Add `get_many()` for batch retrieval of multiple keys
+- Add `set_many()` for batch insertion of multiple entries
+- Add `CacheStats` dataclass with hits, misses, evictions, expired, and hit_rate
+- Add `stats()` to retrieve current cache statistics
+- Add `reset_stats()` to zero out stat counters
+- Track hits and misses in `get()`, evictions in LRU eviction, expired in cleanup
+- Add 8 badges, Support section, and issue templates to README
+- Add `[tool.pytest.ini_options]` and `[tool.mypy]` to pyproject.toml
+
 ## 0.2.3
 
 - Add Development section to README
