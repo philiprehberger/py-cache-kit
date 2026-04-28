@@ -264,3 +264,90 @@ def test_expired_cleaned_before_lru_eviction():
     assert c.get("b") == 2
     assert c.get("c") == 3
     assert c.get("d") == 4
+
+
+# --- get_or_compute ---
+
+class TestGetOrCompute:
+    def test_first_call_computes_and_caches(self):
+        c: Cache[int] = Cache()
+        calls = {"n": 0}
+
+        def compute() -> int:
+            calls["n"] += 1
+            return 42
+
+        result = c.get_or_compute("k", compute)
+        assert result == 42
+        assert calls["n"] == 1
+        assert c.get("k") == 42
+
+    def test_second_call_returns_cached_without_invoking_fn(self):
+        c: Cache[int] = Cache()
+        calls = {"n": 0}
+
+        def compute() -> int:
+            calls["n"] += 1
+            return 42
+
+        first = c.get_or_compute("k", compute)
+        second = c.get_or_compute("k", compute)
+        assert first == 42
+        assert second == 42
+        assert calls["n"] == 1  # only invoked once
+
+    def test_ttl_honored_recomputes_after_expiry(self):
+        with patch("philiprehberger_cache_kit.cache.time.monotonic", side_effect=_mock_monotonic):
+            _time_val[0] = 0.0
+            c: Cache[int] = Cache()
+            calls = {"n": 0}
+
+            def compute() -> int:
+                calls["n"] += 1
+                return calls["n"]
+
+            assert c.get_or_compute("k", compute, ttl=5.0) == 1
+            _time_val[0] = 6.0  # past expiry
+            assert c.get_or_compute("k", compute, ttl=5.0) == 2
+            assert calls["n"] == 2
+
+    def test_tags_honored_invalidate_by_tag_recomputes(self):
+        c: Cache[int] = Cache()
+        calls = {"n": 0}
+
+        def compute() -> int:
+            calls["n"] += 1
+            return calls["n"]
+
+        assert c.get_or_compute("k", compute, tags=["users"]) == 1
+        assert c.get_or_compute("k", compute, tags=["users"]) == 1  # cached
+        removed = c.invalidate_by_tag("users")
+        assert removed == 1
+        assert c.get_or_compute("k", compute, tags=["users"]) == 2
+        assert calls["n"] == 2
+
+    def test_hit_miss_counters_update(self):
+        c: Cache[int] = Cache()
+
+        def compute() -> int:
+            return 7
+
+        c.get_or_compute("k", compute)  # miss + cache
+        c.get_or_compute("k", compute)  # hit
+        stats = c.stats()
+        assert stats.misses >= 1
+        assert stats.hits >= 1
+
+    def test_compute_fn_returning_none_does_not_recompute(self):
+        c: Cache[int | None] = Cache()
+        calls = {"n": 0}
+
+        def compute() -> None:
+            calls["n"] += 1
+            return None
+
+        first = c.get_or_compute("k", compute)
+        second = c.get_or_compute("k", compute)
+        assert first is None
+        assert second is None
+        assert calls["n"] == 1  # legitimate cached None must not trigger recompute

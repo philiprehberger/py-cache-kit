@@ -60,6 +60,29 @@ removed = cache.invalidate_by_tag("team-a")
 print(removed)  # 2
 ```
 
+### Lazy load with get_or_compute
+
+```python
+from philiprehberger_cache_kit import Cache
+
+cache: Cache[dict] = Cache(max_size=1000)
+
+def fetch_user(user_id: int) -> dict:
+    # Expensive lookup (DB, HTTP, etc.) — only called on cache miss.
+    return {"id": user_id, "name": "Ada"}
+
+# First call: computes, caches with TTL/tags, returns the value (miss).
+user = cache.get_or_compute(
+    "user:1",
+    lambda: fetch_user(1),
+    ttl=60.0,
+    tags=["users"],
+)
+
+# Second call within TTL: returns cached value, compute_fn is NOT invoked (hit).
+user = cache.get_or_compute("user:1", lambda: fetch_user(1))
+```
+
 ### Batch Operations
 
 ```python
@@ -111,6 +134,7 @@ cache.clear()           # remove everything
 | `Cache(max_size=1000, default_ttl=None)` | Create a new cache |
 | `.set(key, value, ttl=None, tags=None)` | Store a value |
 | `.get(key, default=None)` | Retrieve a value |
+| `.get_or_compute(key, compute_fn, ttl=None, tags=None)` | Return cached value, or compute and cache it on miss |
 | `.get_many(keys)` | Retrieve multiple values, skip missing/expired |
 | `.set_many(items, ttl=None)` | Store multiple values |
 | `.has(key)` | Check if key exists and is not expired |

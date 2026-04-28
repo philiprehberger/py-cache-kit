@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0 (2026-04-27)
+
+- Add `get_or_compute(key, compute_fn, ttl=None, tags=None)` method for lazy-loading: returns the cached value if present (hit), otherwise computes, caches with `ttl`/`tags`, and returns it (miss)
+
 ## 0.3.1 (2026-03-31)
 
 - Standardize README to 3-badge format with emoji Support section
@@ -16,17 +20,17 @@
 - Add 8 badges, Support section, and issue templates to README
 - Add `[tool.pytest.ini_options]` and `[tool.mypy]` to pyproject.toml
 
-## 0.2.3
+## 0.2.3 (2026-03-23)
 
 - Add Development section to README
 - Add wheel build target to pyproject.toml
 
-## 0.2.1
+## 0.2.1 (2026-03-20)
 
 - Fix cache eviction to clean all expired entries before LRU fallback
 - Fix `size` property to exclude expired entries
 
-## 0.2.0
+## 0.2.0 (2026-03-17)
 
 - Add `max_size` validation (must be at least 1)
 - Add `__len__()` for `len(cache)` support
@@ -35,13 +39,14 @@
 - Add comprehensive test suite (~25 tests)
 - Add API reference table to README
 
-## 0.1.2
+## 0.1.2 (2026-03-13)
 
 - Update project URLs in pyproject.toml
 
-## 0.1.1
+## 0.1.1 (2026-03-12)
 
 - Add project URLs to pyproject.toml
 
-## 0.1.0
+## 0.1.0 (2026-03-10)
+
 - Initial release

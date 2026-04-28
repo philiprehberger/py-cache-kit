@@ -3,9 +3,11 @@ from __future__ import annotations
 import time
 from collections import OrderedDict
 from dataclasses import dataclass, field
-from typing import TypeVar, Generic
+from typing import Callable, TypeVar, Generic
 
 T = TypeVar("T")
+
+_MISSING: object = object()
 
 
 @dataclass
@@ -78,6 +80,32 @@ class Cache(Generic[T]):
         self._stats.hits += 1
         self._store.move_to_end(key)
         return entry.value
+
+    def get_or_compute(
+        self,
+        key: str,
+        compute_fn: Callable[[], T],
+        *,
+        ttl: float | None = None,
+        tags: list[str] | None = None,
+    ) -> T:
+        """Return the cached value, or compute and cache it if missing/expired.
+
+        First checks ``get(key)`` using a private sentinel as the default.
+          - On hit (counts as a hit), returns the cached value (which may be ``None``).
+          - On miss (counts as a miss), invokes ``compute_fn()`` exactly once,
+            calls ``set(key, value, ttl=ttl, tags=tags)``, and returns the value.
+
+        Stats: exactly one ``get()`` call is performed, so each invocation is
+        counted as either a hit or a miss — never both.
+        """
+        cached = self.get(key, default=_MISSING)  # type: ignore[arg-type]
+        if cached is not _MISSING:
+            return cached  # type: ignore[return-value]
+        value = compute_fn()
+        tag_set: set[str] | None = set(tags) if tags is not None else None
+        self.set(key, value, ttl=ttl, tags=tag_set)
+        return value
 
     def get_many(self, keys: list[str]) -> dict[str, T]:
         result: dict[str, T] = {}
