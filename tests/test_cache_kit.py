@@ -351,3 +351,39 @@ class TestGetOrCompute:
         assert first is None
         assert second is None
         assert calls["n"] == 1  # legitimate cached None must not trigger recompute
+
+
+def test_invalidate_by_tags_removes_multiple_tags_in_one_pass() -> None:
+    from philiprehberger_cache_kit import Cache
+
+    c: Cache[str] = Cache()
+    c.set("a", "1", tags={"red"})
+    c.set("b", "2", tags={"blue"})
+    c.set("c", "3", tags={"green"})
+    c.set("d", "4", tags={"red", "blue"})  # matches both — counted once
+
+    removed = c.invalidate_by_tags(["red", "blue"])
+    assert removed == 3
+    assert c.get("a") is None
+    assert c.get("b") is None
+    assert c.get("c") == "3"
+    assert c.get("d") is None
+
+
+def test_invalidate_by_tags_with_empty_iter_is_noop() -> None:
+    from philiprehberger_cache_kit import Cache
+
+    c: Cache[str] = Cache()
+    c.set("a", "1", tags={"red"})
+    assert c.invalidate_by_tags([]) == 0
+    assert c.get("a") == "1"
+
+
+def test_invalidate_by_tags_returns_unique_count() -> None:
+    from philiprehberger_cache_kit import Cache
+
+    c: Cache[int] = Cache()
+    c.set("k", 1, tags={"a", "b", "c"})
+    # Single entry matches all three tags but should only be removed once.
+    assert c.invalidate_by_tags(["a", "b", "c"]) == 1
+    assert c.get("k") is None

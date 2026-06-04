@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import time
 from collections import OrderedDict
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Callable, TypeVar, Generic
 
@@ -147,6 +148,29 @@ class Cache(Generic[T]):
 
     def invalidate_by_tag(self, tag: str) -> int:
         keys_to_delete = [k for k, v in self._store.items() if tag in v.tags]
+        for key in keys_to_delete:
+            del self._store[key]
+        return len(keys_to_delete)
+
+    def invalidate_by_tags(self, tags: Iterable[str]) -> int:
+        """Remove every entry tagged with any of *tags* in a single pass.
+
+        Equivalent to calling :meth:`invalidate_by_tag` for each tag, but
+        traverses the store only once and only counts each entry once even
+        if it matches multiple tags.
+
+        Args:
+            tags: Iterable of tag strings.
+
+        Returns:
+            The number of entries that were removed.
+        """
+        tag_set = set(tags)
+        if not tag_set:
+            return 0
+        keys_to_delete = [
+            k for k, v in self._store.items() if v.tags & tag_set
+        ]
         for key in keys_to_delete:
             del self._store[key]
         return len(keys_to_delete)

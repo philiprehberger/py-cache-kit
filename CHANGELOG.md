@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0 (2026-06-04)
+
+- Add `Cache.invalidate_by_tags(tags)` that removes every entry tagged with any of the supplied tags in a single pass (existing `invalidate_by_tag` only handles one tag at a time)
+- Sync `pyproject.toml` `description` with the README one-liner
+- Add `package-card.webp` to README
+
 ## 0.4.0 (2026-04-27)
 
 - Add `get_or_compute(key, compute_fn, ttl=None, tags=None)` method for lazy-loading: returns the cached value if present (hit), otherwise computes, caches with `ttl`/`tags`, and returns it (miss)

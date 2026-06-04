@@ -4,6 +4,8 @@
 [![PyPI version](https://img.shields.io/pypi/v/philiprehberger-cache-kit.svg)](https://pypi.org/project/philiprehberger-cache-kit/)
 [![Last updated](https://img.shields.io/github/last-commit/philiprehberger/py-cache-kit)](https://github.com/philiprehberger/py-cache-kit/commits/main)
 
+![philiprehberger-cache-kit](https://raw.githubusercontent.com/philiprehberger/py-cache-kit/main/package-card.webp)
+
 Lightweight in-memory cache with TTL, LRU eviction, and tag-based invalidation.
 
 ## Installation
@@ -58,6 +60,9 @@ cache.set("post:1", post_data, tags={"posts", "team-a"})
 # Invalidate all entries tagged "team-a"
 removed = cache.invalidate_by_tag("team-a")
 print(removed)  # 2
+
+# Invalidate everything tagged "team-a" OR "team-b" in one pass
+removed = cache.invalidate_by_tags(["team-a", "team-b"])
 ```
 
 ### Lazy load with get_or_compute
@@ -140,6 +145,7 @@ cache.clear()           # remove everything
 | `.has(key)` | Check if key exists and is not expired |
 | `.delete(key)` | Remove a key |
 | `.invalidate_by_tag(tag)` | Remove all entries with a tag |
+| `.invalidate_by_tags(tags)` | Remove all entries matching any tag in *tags* (single pass) |
 | `.clear()` | Remove all entries |
 | `.keys()` | List non-expired keys |
 | `.get_entry(key)` | Get `CacheEntry` object (value, expires_at, tags) |
